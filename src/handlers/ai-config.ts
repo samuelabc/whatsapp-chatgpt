@@ -11,12 +11,36 @@ const aiConfig: IAiConfig = {
 
 const handleMessageAIConfig = async (message: Message, prompt: any) => {
 	try {
-		console.log("[Whatsapp Config] Received prompt from " + message.from + ": " + prompt);
+		console.log("[AI-Config] Received prompt from " + message.from + ": " + prompt);
 
 		const args: string[] = prompt.split(" ");
 
+		/*
+			!config
+			!config help
+		*/
+		if (args.length == 1 || prompt === "help") {
+			let helpMessage = "Available commands:\n";
+			for (let target in aiConfigTarget) {
+				for (let type in aiConfigTypes[target]) {
+					helpMessage += `\t!config ${target} ${type} <value> - Set ${target} ${type} to <value>\n`;
+				}
+			}
+			helpMessage += "\nAvailable values:\n";
+			for (let target in aiConfigTarget) {
+				for (let type in aiConfigTypes[target]) {
+					helpMessage += `\t${target} ${type}: ${Object.keys(aiConfigValues[target][type]).join(", ")}\n`;
+				}
+			}
+			message.reply(helpMessage);
+			return;
+		}
+
+		// !config <target> <type> <value>
 		if (args.length !== 3) {
-			message.reply("Invalid number of arguments, please use the following format: <target> <type> <value>");
+			message.reply(
+				"Invalid number of arguments, please use the following format: <target> <type> <value> or type !config help for more information."
+			);
 			return;
 		}
 
